@@ -12,14 +12,14 @@
     <div class="slider">
         <div class="title-container">Set Range of Temperature</div>
         <ngx-slider [(value)]="minValue" [(highValue)]="maxValue" [options]="options"></ngx-slider>
-        <button class="slider-btn">Submit</button>
+        <button class="slider-btn" (click)="submitValues()">Submit</button>
     </div>
     <div class="horizontal-line"></div>
     <div class="current-temp">
         <div class="title-container">Current Temperature:</div>
         <div class="temp-container">
             <div class="temp-value">
-                10°C
+                {{currentTemp}}°C
             </div>
             <button class="refresh" (click)="refreshTemp()"><fa-icon [icon]="rotateIcon"></fa-icon></button>
         </div>
