@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Options, LabelType, CustomStepDefinition } from '@angular-slider/ngx-slider';
 import { faRotate } from '@fortawesome/free-solid-svg-icons';
+import { ArduinoService } from './arduino.service';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -8,7 +10,8 @@ import { faRotate } from '@fortawesome/free-solid-svg-icons';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  currentTemp = "20";
   rotateIcon = faRotate;
 
   minValue: number = 15;
@@ -28,7 +31,19 @@ export class AppComponent {
     }
   };
 
+  constructor (private arduinoService : ArduinoService) {}
+  ngOnInit(): void {
+    this.arduinoService.getCurrentTemp().subscribe(temp => {
+      this.currentTemp = <string> temp;
+    })
+  }
+
+
   refreshTemp() {
-    console.log("hello");
+    this.arduinoService.getCurrentTemp();
+  }
+
+  submitValues() {
+    this.arduinoService.submitValues(this.minValue, this.maxValue);
   }
 }
