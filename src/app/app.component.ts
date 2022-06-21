@@ -3,6 +3,7 @@ import { Options, LabelType, CustomStepDefinition } from '@angular-slider/ngx-sl
 import { faRotate } from '@fortawesome/free-solid-svg-icons';
 import { ArduinoService } from './arduino.service';
 import { Subscription } from 'rxjs';
+import { MinMaxValues } from './model';
 
 
 @Component({
@@ -34,11 +35,19 @@ export class AppComponent implements OnInit {
   constructor (private arduinoService : ArduinoService) {}
   ngOnInit(): void {
     this.refreshTemp();
+    this.refreshMinMaxValues();
   }
 
   refreshTemp() {
     this.arduinoService.getCurrentTemp().subscribe((temp) => {
       this.currentTemp = temp;
+    });
+  }
+
+  refreshMinMaxValues() {
+    this.arduinoService.getMinMaxValues().subscribe((values: MinMaxValues) => {
+      this.minValue = values.minValue;
+      this.maxValue = values.maxValue;
     });
   }
 

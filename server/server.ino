@@ -57,6 +57,20 @@ void handleSetValues() {
   server.send(200, "application/json", "Success!");
 }
 
+void handleGetMinMaxValues() {
+  const int capacity = JSON_OBJECT_SIZE(2);
+  StaticJsonDocument<capacity> jsonDocument;
+
+  jsonDocument["minValue"] = minValue;
+  jsonDocument["maxValue"] = maxValue;
+
+  String responseString = String();
+
+  serializeJson(jsonDocument, responseString);
+
+  server.send(200, "application/json", responseString);
+}
+
 void setup(void) {
   pinMode(led, OUTPUT);
   digitalWrite(led, 0);
@@ -83,6 +97,7 @@ void setup(void) {
   //Routing
   server.on("/curr-temp", currentTemp);
   server.on("/set-values", HTTP_POST, handleSetValues);
+  server.on("/get-values", handleGetMinMaxValues);
 
   //Start
   server.begin();
