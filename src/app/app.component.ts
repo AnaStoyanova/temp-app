@@ -33,14 +33,13 @@ export class AppComponent implements OnInit {
 
   constructor (private arduinoService : ArduinoService) {}
   ngOnInit(): void {
-    this.arduinoService.getCurrentTemp().subscribe(temp => {
-      this.currentTemp = <string> temp;
-    })
+    this.refreshTemp();
   }
 
-
   refreshTemp() {
-    this.arduinoService.getCurrentTemp();
+    this.arduinoService.getCurrentTemp().subscribe((temp) => {
+      this.currentTemp = temp;
+    });
   }
 
   submitValues() {

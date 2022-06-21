@@ -4,8 +4,24 @@
 #include <ESPmDNS.h>
 #include <ArduinoJson.h>
 
-const char* ssid = "A1_A1E4B1";
-const char* password = "12e1c3a2";
+// Includes for BME280 (temperature sensor)
+
+#include <Wire.h>
+#include <SPI.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
+
+// Values for temperature sensor
+
+#define SEALEVELPRESSURE_HPA (1013.25)
+#define SDA_PIN 16 // corresponding to RX2 on the ESP32
+#define SCL_PIN 17 // corresponding to TX2 on the ESP32
+
+Adafruit_BME280 bme; // I2C
+
+
+const char* ssid = "A1_A1718E";
+const char* password = "1d8a7242";
 
 WebServer server(80);
 
@@ -13,17 +29,16 @@ const int led = 13;
 StaticJsonDocument<250> jsonDocument;
 
 
-String temp = "50";
 int minValue = -5;
 int maxValue = 50;
 
 void currentTemp() {
   digitalWrite(led, 1);
-  server.send(200, "text/plain", temp);
+  server.send(200, "text/plain", String(bme.readTemperature()));
   digitalWrite(led, 0);
 }
 
-void handlePost() {
+void handleSetValues() {
   if (server.hasArg("plain") == false) {
     //handle error here
   }
@@ -67,12 +82,23 @@ void setup(void) {
 
   //Routing
   server.on("/curr-temp", currentTemp);
-  server.on("/set-values", HTTP_POST, handlePost);  
+  server.on("/set-values", HTTP_POST, handleSetValues);
 
   //Start
   server.begin();
   server.enableCORS(true); //DON'T REMOVE, REPEAT DON'T REMOVE
   Serial.println("HTTP server started");
+
+  // Setup temperature sensor
+    
+  Wire.begin(SDA_PIN, SCL_PIN);
+
+  unsigned status = bme.begin(0x76);  
+
+  if (!status) {
+      Serial.println("Could not find a valid BME280 sensor!");
+      while (1) delay(10);
+  }
 }
 
 void loop(void) {

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,10 +10,10 @@ export class ArduinoService {
   constructor(private http: HttpClient) { }
   arduinoUrl = 'http://192.168.1.8:80';
 
-  getCurrentTemp() {
+  getCurrentTemp(): Observable<string> {
     let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     let options = { headers: headers, crossDomain: true};
-    return this.http.get(this.arduinoUrl + '/curr-temp', options);
+    return this.http.get<string>(this.arduinoUrl + '/curr-temp', options);
   }
 
   submitValues(minValue: number, maxValue: number) {
