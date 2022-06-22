@@ -11,6 +11,10 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 
+// Includes for LED bar
+
+#include <NeoPixelBus.h>
+
 // Values for temperature sensor
 
 #define SEALEVELPRESSURE_HPA (1013.25)
@@ -18,6 +22,16 @@
 #define SCL_PIN 17 // corresponding to TX2 on the ESP32
 
 Adafruit_BME280 bme; // I2C
+
+// Values for LED bar
+
+#define BlackColor     RgbColor(0, 0, 0)
+#define RedColor     RgbColor(255, 0, 0)
+
+const uint16_t pixelCount = 8;
+const uint8_t pixelBarDataPin = 2;
+
+NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> ledBar(pixelCount, pixelBarDataPin);
 
 
 const char* ssid = "A1_A1718E";
@@ -31,6 +45,11 @@ StaticJsonDocument<250> jsonDocument;
 
 int minValue = -5;
 int maxValue = 50;
+
+unsigned long currentMillis = 0;
+
+unsigned long previousLedBarUpdateMillis = 0;
+unsigned long ledBarUpdateIntervalMillis = 1000;
 
 void currentTemp() {
   digitalWrite(led, 1);
@@ -114,9 +133,37 @@ void setup(void) {
       Serial.println("Could not find a valid BME280 sensor!");
       while (1) delay(10);
   }
+
+  // Setup LED bar
+
+  ledBar.Begin();
+  ledBar.Show();
 }
 
 void loop(void) {
+  currentMillis = millis();
+  updateLedBar();
   server.handleClient();
   delay(2);//allow the cpu to switch to other tasks
+}
+
+void updateLedBar() {
+  if (currentMillis - previousLedBarUpdateMillis < ledBarUpdateIntervalMillis) {
+    return;
+  }
+
+  float currentTemperature = bme.readTemperature();
+  float temperatureRangeStep = ((maxValue - minValue) * 1.0f) / (pixelCount - 1);
+
+  for (int i = 0; i < pixelCount; i++) {
+    if (minValue + (temperatureRangeStep * i) <= currentTemperature) {
+      ledBar.SetPixelColor(i, RgbColor::LinearBlend(RedColor, BlackColor, 0.9F));
+    } else {
+      ledBar.SetPixelColor(i, BlackColor);
+    }
+    
+    ledBar.Show();
+  }
+
+  previousLedBarUpdateMillis = currentMillis;
 }
